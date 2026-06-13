@@ -21,7 +21,7 @@ body{
   color:#fff;
 }
 
-/* PARTICLES BACKGROUND */
+/* PARTICLES */
 canvas{
   position:fixed;
   top:0;
@@ -33,26 +33,26 @@ canvas{
 nav{
   display:flex;
   justify-content:space-between;
-  padding:20px 50px;
+  padding:18px 40px;
   position:fixed;
   width:100%;
   z-index:10;
-  background:rgba(0,0,0,0.4);
+  background:rgba(0,0,0,0.5);
   backdrop-filter:blur(10px);
 }
 
 nav h1{
   color:#00ffff;
-  letter-spacing:2px;
 }
 
 nav a{
   color:white;
   margin-left:20px;
   text-decoration:none;
+  font-size:14px;
 }
 
-/* HERO 3D */
+/* HERO */
 .hero{
   height:100vh;
   display:flex;
@@ -64,7 +64,7 @@ nav a{
 
 .card3d{
   transform-style:preserve-3d;
-  transition:0.2s;
+  transition:transform 0.1s ease-out;
   padding:40px;
 }
 
@@ -95,10 +95,18 @@ nav a{
   font-weight:bold;
 }
 
-/* PORTFOLIO */
+/* SECTIONS */
 .section{
   padding:80px 20px;
   text-align:center;
+  opacity:0;
+  transform:translateY(40px);
+  transition:all 0.8s ease;
+}
+
+.section.show{
+  opacity:1;
+  transform:translateY(0);
 }
 
 .grid{
@@ -114,11 +122,10 @@ nav a{
   border-radius:15px;
   overflow:hidden;
   transition:0.3s;
-  transform-style:preserve-3d;
 }
 
 .item:hover{
-  transform:rotateY(15deg) rotateX(10deg) scale(1.05);
+  transform:scale(1.05) rotateY(10deg);
   box-shadow:0 0 25px cyan;
 }
 
@@ -143,6 +150,7 @@ nav a{
 /* MOBILE */
 @media(max-width:600px){
   .hero h2{font-size:32px;}
+  nav{padding:15px 20px;}
 }
 </style>
 </head>
@@ -183,7 +191,7 @@ nav a{
 <!-- ABOUT -->
 <section class="section about">
   <h2>About Me</h2>
-  <p>I am a 3D thumbnail designer helping YouTubers go viral with high CTR visuals.</p>
+  <p>I am a 3D thumbnail designer helping creators go viral with high CTR visuals.</p>
 </section>
 
 <!-- CONTACT -->
@@ -195,12 +203,12 @@ nav a{
 </section>
 
 <script>
-/* 3D MOUSE MOVE EFFECT */
+/* 3D MOUSE EFFECT (SMOOTH FIXED) */
 const card = document.getElementById("card");
 
 document.addEventListener("mousemove",(e)=>{
-  let x = (window.innerWidth/2 - e.pageX)/25;
-  let y = (window.innerHeight/2 - e.pageY)/25;
+  let x = (window.innerWidth/2 - e.clientX)/30;
+  let y = (window.innerHeight/2 - e.clientY)/30;
   card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
 });
 
@@ -209,22 +217,26 @@ function scrollToWork(){
   document.getElementById("work").scrollIntoView({behavior:"smooth"});
 }
 
-/* PARTICLES */
+/* PARTICLES FIXED */
 const canvas = document.getElementById("particles");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize",resize);
 
 let particlesArray = [];
 
-for(let i=0;i<80;i++){
+for(let i=0;i<70;i++){
   particlesArray.push({
     x:Math.random()*canvas.width,
     y:Math.random()*canvas.height,
-    size:Math.random()*3,
-    speedX:Math.random()*1-0.5,
-    speedY:Math.random()*1-0.5
+    size:Math.random()*2.5,
+    speedX:(Math.random()-0.5)*1,
+    speedY:(Math.random()-0.5)*1
   });
 }
 
@@ -235,8 +247,10 @@ function animate(){
     p.x += p.speedX;
     p.y += p.speedY;
 
-    if(p.x<0 || p.x>canvas.width) p.speedX *= -1;
-    if(p.y<0 || p.y>canvas.height) p.speedY *= -1;
+    if(p.x<0) p.x = canvas.width;
+    if(p.x>canvas.width) p.x = 0;
+    if(p.y<0) p.y = canvas.height;
+    if(p.y>canvas.height) p.y = 0;
 
     ctx.fillStyle="cyan";
     ctx.beginPath();
@@ -248,6 +262,19 @@ function animate(){
 }
 
 animate();
+
+/* SCROLL ANIMATION */
+const sections = document.querySelectorAll(".section");
+
+window.addEventListener("scroll",()=>{
+  sections.forEach(sec=>{
+    let top = window.scrollY;
+    let offset = sec.offsetTop - 500;
+    if(top > offset){
+      sec.classList.add("show");
+    }
+  });
+});
 </script>
 
 </body>
