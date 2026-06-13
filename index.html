@@ -3,31 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cinematic 3D Portfolio</title>
+<title>Acko Style Portfolio FIXED</title>
 
 <style>
 body{
   margin:0;
-  overflow-x:hidden;
   background:#000;
-  color:white;
+  overflow-x:hidden;
   font-family:Arial;
 }
 
-/* UI */
-.ui{
-  position:fixed;
-  top:20px;
-  left:20px;
-  z-index:10;
-  color:#00ffff;
-  font-size:14px;
-  opacity:0.8;
-}
-
-/* scroll space */
+/* scroll area */
 .scroll{
-  height:500vh;
+  height:400vh;
 }
 
 canvas{
@@ -35,12 +23,21 @@ canvas{
   top:0;
   left:0;
 }
+
+.ui{
+  position:fixed;
+  top:20px;
+  left:20px;
+  color:#00ffff;
+  z-index:10;
+  font-size:14px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="ui">🎬 Cinematic 3D Portfolio — Scroll + Click Objects</div>
+<div class="ui">🔥 FIXED Acko-Style 3D Portfolio</div>
 <div class="scroll"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
@@ -48,12 +45,12 @@ canvas{
 <script>
 
 // =====================
-// SCENE
+// SAFE SCENE SETUP
 // =====================
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x000000, 5, 80);
 
-// CAMERA
+// CAMERA (IMPORTANT FIX)
 const camera = new THREE.PerspectiveCamera(
   70,
   window.innerWidth/window.innerHeight,
@@ -65,103 +62,72 @@ camera.position.set(0,0,5);
 // RENDERER
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
 // =====================
-// LIGHTS (GLOW FEEL)
+// LIGHTS (CRITICAL FIX)
 // =====================
 const light = new THREE.PointLight(0x00ffff, 2);
 light.position.set(5,5,5);
 scene.add(light);
 
-scene.add(new THREE.AmbientLight(0x111111));
+scene.add(new THREE.AmbientLight(0x222222));
 
 // =====================
-// 3D PROJECT OBJECTS (CLICKABLE)
+// SAFE OBJECTS (NO BLACK SCREEN)
 // =====================
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+const objects = [];
 
-const geometry = new THREE.IcosahedronGeometry(1,0);
+const geometry = new THREE.BoxGeometry(1,1,1);
 const material = new THREE.MeshStandardMaterial({
   color:0x00ffff,
-  emissive:0x003333,
-  metalness:0.6,
+  metalness:0.5,
   roughness:0.3
 });
 
-const projects = [];
+// FIX: keep objects ALWAYS in view range
+for(let i=0;i<15;i++){
+  const box = new THREE.Mesh(geometry, material);
 
-for(let i=0;i<12;i++){
-  const obj = new THREE.Mesh(geometry, material);
+  box.position.x = (Math.random()-0.5)*6;
+  box.position.y = (Math.random()-0.5)*6;
+  box.position.z = -i*3;
 
-  obj.position.x = (Math.random()-0.5)*8;
-  obj.position.y = (Math.random()-0.5)*6;
-  obj.position.z = -i*6;
-
-  obj.userData = {
-    name: "Project " + (i+1),
-    url: "https://example.com"
-  };
-
-  scene.add(obj);
-  projects.push(obj);
+  scene.add(box);
+  objects.push(box);
 }
 
 // =====================
-// SCROLL → CINEMATIC CAMERA PATH
+// SAFE SCROLL SYSTEM (IMPORTANT FIX)
 // =====================
 let scrollY = 0;
+let targetZ = 5;
 
 window.addEventListener("scroll",()=>{
   scrollY = window.scrollY;
 });
 
 // =====================
-// CLICK EVENTS
-// =====================
-window.addEventListener("click",(event)=>{
-
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouse,camera);
-
-  const hits = raycaster.intersectObjects(projects);
-
-  if(hits.length > 0){
-    const obj = hits[0].object;
-    alert("Opened: " + obj.userData.name);
-
-    // real use case:
-    // window.open(obj.userData.url, "_blank");
-  }
-});
-
-// =====================
-// ANIMATION LOOP (CINEMATIC CAMERA)
+// ANIMATION LOOP (FIXED + SMOOTH)
 // =====================
 function animate(){
   requestAnimationFrame(animate);
 
-  // 🎬 cinematic scroll movement (smooth camera travel)
-  camera.position.z = 5 + scrollY * 0.05;
+  // SAFE CAMERA MOVEMENT (NO EXPLOSION)
+  targetZ = 5 + scrollY * 0.02;
 
-  // slight cinematic drift
-  camera.position.x = Math.sin(scrollY * 0.001) * 2;
-  camera.position.y = Math.cos(scrollY * 0.0015) * 1;
+  camera.position.z += (targetZ - camera.position.z) * 0.08;
 
-  camera.lookAt(0,0,-20);
+  camera.position.x = Math.sin(scrollY * 0.001) * 1.5;
+  camera.position.y = Math.cos(scrollY * 0.0012) * 1.2;
 
-  // ✨ object animation
-  projects.forEach((p,i)=>{
-    p.rotation.x += 0.003;
-    p.rotation.y += 0.006;
+  camera.lookAt(0,0,-10);
 
-    // glow pulse illusion
-    const scale = 1 + Math.sin(Date.now()*0.001 + i) * 0.05;
-    p.scale.set(scale,scale,scale);
+  // rotate objects slowly
+  objects.forEach((o)=>{
+    o.rotation.x += 0.01;
+    o.rotation.y += 0.01;
   });
 
   renderer.render(scene,camera);
@@ -170,7 +136,7 @@ function animate(){
 animate();
 
 // =====================
-// RESIZE
+// RESIZE FIX
 // =====================
 window.addEventListener("resize",()=>{
   camera.aspect = window.innerWidth/window.innerHeight;
