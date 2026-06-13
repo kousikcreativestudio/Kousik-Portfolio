@@ -3,46 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kousik Onteru | Real 3D Portfolio</title>
+<title>Kousik | Acko Level 3D Portfolio</title>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial;
-}
-
 body{
+  margin:0;
   overflow-x:hidden;
   background:#000;
   color:white;
+  font-family:Arial;
 }
 
-/* UI OVERLAY */
+/* overlay UI */
 .ui{
   position:fixed;
-  z-index:10;
-  width:100%;
-  text-align:center;
   top:20px;
+  left:20px;
+  z-index:10;
+  color:cyan;
   font-size:14px;
   opacity:0.8;
-  color:cyan;
 }
 
-section{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  text-align:center;
-}
-
-/* fake scroll space */
+/* scroll container */
 .scroll{
-  height:300vh;
+  height:400vh;
 }
 
 /* canvas */
@@ -56,79 +41,76 @@ canvas{
 
 <body>
 
-<div class="ui">🔥 Kousik Real 3D Portfolio (Scroll to move)</div>
-
+<div class="ui">🔥 Acko-Level 3D Portfolio — Scroll to travel</div>
 <div class="scroll"></div>
-
-<section>
-  <h1>Welcome</h1>
-  <p>3D Portfolio Experience</p>
-</section>
-
-<section>
-  <h1>My Work</h1>
-</section>
-
-<section>
-  <h1>Contact Me</h1>
-</section>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
 
 // =========================
-// SCENE SETUP
+// SCENE
 // =========================
 const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x000000, 5, 60);
 
+// CAMERA
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth/window.innerHeight,
   0.1,
   1000
 );
+camera.position.z = 5;
 
+// RENDERER
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
 document.body.appendChild(renderer.domElement);
 
 // =========================
-// LIGHTS
+// LIGHTING (IMPORTANT FOR AAA FEEL)
 // =========================
-const light = new THREE.PointLight(0x00ffff, 2);
-light.position.set(5,5,5);
-scene.add(light);
+const ambient = new THREE.AmbientLight(0x222222);
+scene.add(ambient);
 
-scene.add(new THREE.AmbientLight(0x222222));
+const pointLight = new THREE.PointLight(0x00ffff, 2);
+pointLight.position.set(5,5,5);
+scene.add(pointLight);
 
 // =========================
-// 3D OBJECTS (PORTFOLIO WORLD)
+// 3D PROJECT OBJECTS (WORLD)
 // =========================
-const objects = [];
+const group = new THREE.Group();
+scene.add(group);
 
-const geometry = new THREE.IcosahedronGeometry(1,0);
+const geometry = new THREE.BoxGeometry(1,1,1);
 const material = new THREE.MeshStandardMaterial({
   color:0x00ffff,
-  wireframe:true
+  metalness:0.6,
+  roughness:0.3
 });
 
-// create multiple floating objects
-for(let i=0;i<25;i++){
-  const mesh = new THREE.Mesh(geometry, material);
+const projects = [];
 
-  mesh.position.x = (Math.random()-0.5)*15;
-  mesh.position.y = (Math.random()-0.5)*15;
-  mesh.position.z = -i*4;
+for(let i=0;i<30;i++){
 
-  scene.add(mesh);
-  objects.push(mesh);
+  const box = new THREE.Mesh(geometry, material);
+
+  box.position.x = (Math.random()-0.5)*10;
+  box.position.y = (Math.random()-0.5)*10;
+  box.position.z = -i*4;
+
+  box.rotation.x = Math.random();
+  box.rotation.y = Math.random();
+
+  group.add(box);
+  projects.push(box);
 }
 
-camera.position.z = 5;
-
 // =========================
-// SCROLL CONTROL
+// SCROLL CONTROL (CORE Acko SYSTEM)
 // =========================
 let scrollY = 0;
 
@@ -137,14 +119,14 @@ window.addEventListener("scroll",()=>{
 });
 
 // =========================
-// MOUSE INTERACTION
+// MOUSE PARALLAX
 // =========================
 let mouseX = 0;
 let mouseY = 0;
 
 document.addEventListener("mousemove",(e)=>{
-  mouseX = (e.clientX/window.innerWidth - 0.5)*2;
-  mouseY = (e.clientY/window.innerHeight - 0.5)*2;
+  mouseX = (e.clientX/window.innerWidth - 0.5);
+  mouseY = (e.clientY/window.innerHeight - 0.5);
 });
 
 // =========================
@@ -153,18 +135,21 @@ document.addEventListener("mousemove",(e)=>{
 function animate(){
   requestAnimationFrame(animate);
 
-  // camera scroll movement (ACKO style)
-  camera.position.z = 5 + scrollY * 0.03;
-  camera.position.x = mouseX * 2;
-  camera.position.y = -mouseY * 2;
+  // 🎥 CAMERA TRAVEL (ACKO STYLE CORE)
+  camera.position.z = 5 + scrollY * 0.04;
+  camera.position.x += (mouseX * 2 - camera.position.x) * 0.05;
+  camera.position.y += (-mouseY * 2 - camera.position.y) * 0.05;
 
-  // rotate objects
-  objects.forEach((obj,i)=>{
-    obj.rotation.x += 0.01;
-    obj.rotation.y += 0.01;
+  // 🎯 LOOK AT CENTER
+  camera.lookAt(0,0,0);
+
+  // 🔁 OBJECT ANIMATION
+  projects.forEach((p,i)=>{
+    p.rotation.x += 0.005;
+    p.rotation.y += 0.01;
   });
 
-  renderer.render(scene, camera);
+  renderer.render(scene,camera);
 }
 
 animate();
@@ -175,7 +160,7 @@ animate();
 window.addEventListener("resize",()=>{
   camera.aspect = window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(window.innerWidth,window.innerHeight);
 });
 
 </script>
