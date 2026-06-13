@@ -3,22 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D Scroll Portfolio</title>
+<title>Kousik Onteru | Real 3D Portfolio</title>
 
 <style>
-body{
+*{
   margin:0;
-  overflow:hidden;
-  background:#000;
-  color:white;
+  padding:0;
+  box-sizing:border-box;
   font-family:Arial;
 }
 
-/* scroll container */
-.scrollArea{
-  height:300vh; /* fake scroll world */
+body{
+  overflow-x:hidden;
+  background:#000;
+  color:white;
 }
 
+/* UI OVERLAY */
+.ui{
+  position:fixed;
+  z-index:10;
+  width:100%;
+  text-align:center;
+  top:20px;
+  font-size:14px;
+  opacity:0.8;
+  color:cyan;
+}
+
+section{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  text-align:center;
+}
+
+/* fake scroll space */
+.scroll{
+  height:300vh;
+}
+
+/* canvas */
 canvas{
   position:fixed;
   top:0;
@@ -29,15 +56,30 @@ canvas{
 
 <body>
 
-<div class="scrollArea"></div>
+<div class="ui">🔥 Kousik Real 3D Portfolio (Scroll to move)</div>
+
+<div class="scroll"></div>
+
+<section>
+  <h1>Welcome</h1>
+  <p>3D Portfolio Experience</p>
+</section>
+
+<section>
+  <h1>My Work</h1>
+</section>
+
+<section>
+  <h1>Contact Me</h1>
+</section>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
 
-// =====================
+// =========================
 // SCENE SETUP
-// =====================
+// =========================
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
@@ -51,64 +93,75 @@ const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// =====================
-// OBJECTS (WORLD)
-// =====================
-const geometry = new THREE.BoxGeometry(1,1,1);
-
-const material = new THREE.MeshStandardMaterial({
-  color:0x00ffff,
-  metalness:0.7,
-  roughness:0.2
-});
-
-// multiple objects = "world"
-const cubes = [];
-
-for(let i=0;i<20;i++){
-  const cube = new THREE.Mesh(geometry, material);
-  cube.position.x = (Math.random()-0.5)*10;
-  cube.position.y = (Math.random()-0.5)*10;
-  cube.position.z = -i*5;
-
-  scene.add(cube);
-  cubes.push(cube);
-}
-
-// lights
-const light = new THREE.PointLight(0xffffff, 2);
+// =========================
+// LIGHTS
+// =========================
+const light = new THREE.PointLight(0x00ffff, 2);
 light.position.set(5,5,5);
 scene.add(light);
 
 scene.add(new THREE.AmbientLight(0x222222));
 
+// =========================
+// 3D OBJECTS (PORTFOLIO WORLD)
+// =========================
+const objects = [];
+
+const geometry = new THREE.IcosahedronGeometry(1,0);
+const material = new THREE.MeshStandardMaterial({
+  color:0x00ffff,
+  wireframe:true
+});
+
+// create multiple floating objects
+for(let i=0;i<25;i++){
+  const mesh = new THREE.Mesh(geometry, material);
+
+  mesh.position.x = (Math.random()-0.5)*15;
+  mesh.position.y = (Math.random()-0.5)*15;
+  mesh.position.z = -i*4;
+
+  scene.add(mesh);
+  objects.push(mesh);
+}
+
 camera.position.z = 5;
 
-// =====================
-// SCROLL → CAMERA MOVE
-// =====================
+// =========================
+// SCROLL CONTROL
+// =========================
 let scrollY = 0;
 
 window.addEventListener("scroll",()=>{
   scrollY = window.scrollY;
 });
 
-// =====================
+// =========================
+// MOUSE INTERACTION
+// =========================
+let mouseX = 0;
+let mouseY = 0;
+
+document.addEventListener("mousemove",(e)=>{
+  mouseX = (e.clientX/window.innerWidth - 0.5)*2;
+  mouseY = (e.clientY/window.innerHeight - 0.5)*2;
+});
+
+// =========================
 // ANIMATION LOOP
-// =====================
+// =========================
 function animate(){
   requestAnimationFrame(animate);
 
-  // camera moves forward based on scroll
-  camera.position.z = 5 + scrollY * 0.02;
+  // camera scroll movement (ACKO style)
+  camera.position.z = 5 + scrollY * 0.03;
+  camera.position.x = mouseX * 2;
+  camera.position.y = -mouseY * 2;
 
-  // subtle camera drift
-  camera.position.x = Math.sin(scrollY*0.001) * 2;
-
-  // rotate cubes
-  cubes.forEach((c)=>{
-    c.rotation.x += 0.01;
-    c.rotation.y += 0.01;
+  // rotate objects
+  objects.forEach((obj,i)=>{
+    obj.rotation.x += 0.01;
+    obj.rotation.y += 0.01;
   });
 
   renderer.render(scene, camera);
@@ -116,7 +169,9 @@ function animate(){
 
 animate();
 
-// resize fix
+// =========================
+// RESIZE FIX
+// =========================
 window.addEventListener("resize",()=>{
   camera.aspect = window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
