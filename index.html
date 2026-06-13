@@ -3,278 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kousik Onteru | 3D Designer Portfolio</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
+<title>3D Scroll Portfolio</title>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Poppins',sans-serif;
-}
-
 body{
+  margin:0;
+  overflow:hidden;
   background:#000;
-  overflow-x:hidden;
-  color:#fff;
+  color:white;
+  font-family:Arial;
 }
 
-/* PARTICLES */
+/* scroll container */
+.scrollArea{
+  height:300vh; /* fake scroll world */
+}
+
 canvas{
   position:fixed;
   top:0;
   left:0;
-  z-index:-1;
-}
-
-/* NAV */
-nav{
-  display:flex;
-  justify-content:space-between;
-  padding:18px 40px;
-  position:fixed;
-  width:100%;
-  z-index:10;
-  background:rgba(0,0,0,0.5);
-  backdrop-filter:blur(10px);
-}
-
-nav h1{
-  color:#00ffff;
-}
-
-nav a{
-  color:white;
-  margin-left:20px;
-  text-decoration:none;
-  font-size:14px;
-}
-
-/* HERO */
-.hero{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  perspective:1000px;
-}
-
-.card3d{
-  transform-style:preserve-3d;
-  transition:transform 0.1s ease-out;
-  padding:40px;
-}
-
-.hero h2{
-  font-size:60px;
-  transform:translateZ(60px);
-}
-
-.hero span{
-  color:#00ffff;
-  text-shadow:0 0 20px cyan;
-}
-
-.hero p{
-  margin-top:10px;
-  opacity:0.8;
-}
-
-/* BUTTON */
-.btn{
-  margin-top:20px;
-  padding:12px 30px;
-  background:linear-gradient(45deg,#00ffff,#0066ff);
-  border:none;
-  border-radius:30px;
-  color:black;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-/* SECTIONS */
-.section{
-  padding:80px 20px;
-  text-align:center;
-  opacity:0;
-  transform:translateY(40px);
-  transition:all 0.8s ease;
-}
-
-.section.show{
-  opacity:1;
-  transform:translateY(0);
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:20px;
-  margin-top:40px;
-}
-
-.item{
-  height:180px;
-  background:#111;
-  border-radius:15px;
-  overflow:hidden;
-  transition:0.3s;
-}
-
-.item:hover{
-  transform:scale(1.05) rotateY(10deg);
-  box-shadow:0 0 25px cyan;
-}
-
-.item img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-/* ABOUT */
-.about{
-  background:#0a0a0a;
-}
-
-/* CONTACT */
-.contact a{
-  display:inline-block;
-  margin:10px;
-  color:#00ffff;
-}
-
-/* MOBILE */
-@media(max-width:600px){
-  .hero h2{font-size:32px;}
-  nav{padding:15px 20px;}
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="particles"></canvas>
+<div class="scrollArea"></div>
 
-<nav>
-  <h1>Kousik</h1>
-  <div>
-    <a href="#home">Home</a>
-    <a href="#work">Work</a>
-    <a href="#contact">Contact</a>
-  </div>
-</nav>
-
-<!-- HERO -->
-<section class="hero" id="home">
-  <div class="card3d" id="card">
-    <h2>I Create <span>3D Viral Thumbnails</span></h2>
-    <p>Next Level CTR Boost Design 🚀</p>
-    <button class="btn" onclick="scrollToWork()">View My Work</button>
-  </div>
-</section>
-
-<!-- WORK -->
-<section class="section" id="work">
-  <h2>My Work</h2>
-  <div class="grid">
-    <div class="item"><img src="thumb1.jpg"></div>
-    <div class="item"><img src="thumb2.jpg"></div>
-    <div class="item"><img src="thumb3.jpg"></div>
-    <div class="item"><img src="thumb4.jpg"></div>
-  </div>
-</section>
-
-<!-- ABOUT -->
-<section class="section about">
-  <h2>About Me</h2>
-  <p>I am a 3D thumbnail designer helping creators go viral with high CTR visuals.</p>
-</section>
-
-<!-- CONTACT -->
-<section class="section" id="contact">
-  <h2>Contact</h2>
-  <a href="https://wa.me/91XXXXXXXXXX">WhatsApp</a>
-  <a href="#">Instagram</a>
-  <a href="mailto:youremail@gmail.com">Email</a>
-</section>
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
-/* 3D MOUSE EFFECT (SMOOTH FIXED) */
-const card = document.getElementById("card");
 
-document.addEventListener("mousemove",(e)=>{
-  let x = (window.innerWidth/2 - e.clientX)/30;
-  let y = (window.innerHeight/2 - e.clientY)/30;
-  card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+// =====================
+// SCENE SETUP
+// =====================
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth/window.innerHeight,
+  0.1,
+  1000
+);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// =====================
+// OBJECTS (WORLD)
+// =====================
+const geometry = new THREE.BoxGeometry(1,1,1);
+
+const material = new THREE.MeshStandardMaterial({
+  color:0x00ffff,
+  metalness:0.7,
+  roughness:0.2
 });
 
-/* SCROLL */
-function scrollToWork(){
-  document.getElementById("work").scrollIntoView({behavior:"smooth"});
+// multiple objects = "world"
+const cubes = [];
+
+for(let i=0;i<20;i++){
+  const cube = new THREE.Mesh(geometry, material);
+  cube.position.x = (Math.random()-0.5)*10;
+  cube.position.y = (Math.random()-0.5)*10;
+  cube.position.z = -i*5;
+
+  scene.add(cube);
+  cubes.push(cube);
 }
 
-/* PARTICLES FIXED */
-const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
+// lights
+const light = new THREE.PointLight(0xffffff, 2);
+light.position.set(5,5,5);
+scene.add(light);
 
-function resize(){
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener("resize",resize);
+scene.add(new THREE.AmbientLight(0x222222));
 
-let particlesArray = [];
+camera.position.z = 5;
 
-for(let i=0;i<70;i++){
-  particlesArray.push({
-    x:Math.random()*canvas.width,
-    y:Math.random()*canvas.height,
-    size:Math.random()*2.5,
-    speedX:(Math.random()-0.5)*1,
-    speedY:(Math.random()-0.5)*1
-  });
-}
+// =====================
+// SCROLL → CAMERA MOVE
+// =====================
+let scrollY = 0;
 
+window.addEventListener("scroll",()=>{
+  scrollY = window.scrollY;
+});
+
+// =====================
+// ANIMATION LOOP
+// =====================
 function animate(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  for(let p of particlesArray){
-    p.x += p.speedX;
-    p.y += p.speedY;
-
-    if(p.x<0) p.x = canvas.width;
-    if(p.x>canvas.width) p.x = 0;
-    if(p.y<0) p.y = canvas.height;
-    if(p.y>canvas.height) p.y = 0;
-
-    ctx.fillStyle="cyan";
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-    ctx.fill();
-  }
-
   requestAnimationFrame(animate);
+
+  // camera moves forward based on scroll
+  camera.position.z = 5 + scrollY * 0.02;
+
+  // subtle camera drift
+  camera.position.x = Math.sin(scrollY*0.001) * 2;
+
+  // rotate cubes
+  cubes.forEach((c)=>{
+    c.rotation.x += 0.01;
+    c.rotation.y += 0.01;
+  });
+
+  renderer.render(scene, camera);
 }
 
 animate();
 
-/* SCROLL ANIMATION */
-const sections = document.querySelectorAll(".section");
-
-window.addEventListener("scroll",()=>{
-  sections.forEach(sec=>{
-    let top = window.scrollY;
-    let offset = sec.offsetTop - 500;
-    if(top > offset){
-      sec.classList.add("show");
-    }
-  });
+// resize fix
+window.addEventListener("resize",()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
 </script>
 
 </body>
